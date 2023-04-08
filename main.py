@@ -12,48 +12,6 @@ import requests
 from bs4 import BeautifulSoup
 from natsort import natsorted
 
-domains = ["https://vod-secure.twitch.tv/",
-           "https://vod-metro.twitch.tv/",
-           "https://vod-pop-secure.twitch.tv/",
-           "https://d2e2de1etea730.cloudfront.net/",
-           "https://dqrpb9wgowsf5.cloudfront.net/",
-           "https://ds0h3roq6wcgc.cloudfront.net/",
-           "https://d2nvs31859zcd8.cloudfront.net/",
-           "https://d2aba1wr3818hz.cloudfront.net/",
-           "https://d3c27h4odz752x.cloudfront.net/",
-           "https://dgeft87wbj63p.cloudfront.net/",
-           "https://d1m7jfoe9zdc1j.cloudfront.net/",
-           "https://d3vd9lfkzbru3h.cloudfront.net/",
-           "https://d2vjef5jvl6bfs.cloudfront.net/",
-           "https://d1ymi26ma8va5x.cloudfront.net/",
-           "https://d1mhjrowxxagfy.cloudfront.net/",
-           "https://ddacn6pr5v0tl.cloudfront.net/",
-           "https://d3aqoihi2n8ty8.cloudfront.net/"]
-
-user_agents = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-               "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-               "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-               "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-               "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 12.5; rv:103.0) Gecko/20100101 Firefox/103.0",
-               "Mozilla/5.0 (X11; Linux i686; rv:103.0) Gecko/20100101 Firefox/103.0",
-               "Mozilla/5.0 (Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0",
-               "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:103.0) Gecko/20100101 Firefox/103.0",
-               "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0",
-               "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0",
-               "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 12.5; rv:102.0) Gecko/20100101 Firefox/102.0",
-               "Mozilla/5.0 (X11; Linux i686; rv:102.0) Gecko/20100101 Firefox/102.0",
-               "Mozilla/5.0 (Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0",
-               "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:102.0) Gecko/20100101 Firefox/102.0",
-               "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0",
-               "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6 Safari/605.1.15",
-               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36 Edg/103.0.1264.77",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36 Edg/103.0.1264.77",
-               'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36']
-
 with open("config/vodrecovery_config.json") as config_file:
     vodrecovery_config = json.load(config_file)
 
@@ -112,19 +70,19 @@ def remove_whitespace_and_lowercase(string):
 
 
 def get_log_filepath(streamer_name, vod_id):
-    log_filename = join_and_normalize_path(get_default_directory(), "{}_{}_log.txt".format(streamer_name, vod_id))
+    log_filename = join_and_normalize_path(get_default_directory(), f"{streamer_name}_{vod_id}_log.txt")
     return log_filename
 
 
 def get_vod_filepath(streamer_name, vod_id):
-    vod_filename = join_and_normalize_path(get_default_directory(), "VodRecovery_{}_{}.m3u8".format(streamer_name, vod_id))
+    vod_filename = join_and_normalize_path(get_default_directory(), f"VodRecovery_{streamer_name}_{vod_id}.m3u8")
     return vod_filename
 
 
 def generate_website_links(streamer_name, vod_id):
-    website_list = ["https://sullygnome.com/channel/{}/stream/{}".format(streamer_name, vod_id),
-                    "https://twitchtracker.com/{}/streams/{}".format(streamer_name, vod_id),
-                    "https://streamscharts.com/channels/{}/streams/{}".format(streamer_name, vod_id)]
+    website_list = [f"https://sullygnome.com/channel/{streamer_name}/stream/{vod_id}",
+                    f"https://twitchtracker.com/{streamer_name}/streams/{vod_id}",
+                    f"https://streamscharts.com/channels/{streamer_name}/streams/{vod_id}"]
 
     return website_list
 
@@ -165,8 +123,7 @@ def get_vod_age(timestamp):
 
 def is_vod_muted(url):
     response = requests.get(url).text
-    result = bool("unmuted" in response)
-    return result
+    return bool("unmuted" in response)
 
 
 def get_duration(hours, minutes):
@@ -174,8 +131,7 @@ def get_duration(hours, minutes):
 
 
 def get_reps(duration):
-    reps = ((duration * 60) + 2000)
-    return reps
+    return (duration * 60) + 2000
 
 
 def get_clip_format(vod_id, reps):
@@ -258,7 +214,7 @@ def get_vod_urls(streamer, vod_id, timestamp):
         base_url = streamer + "_" + vod_id + "_" + str(int(epoch_timestamp))
         hashed_base_url = str(hashlib.sha1(base_url.encode('utf-8')).hexdigest())[:20]
         for domain in domains:
-            vod_url_list.append("{}{}_{}/chunked/index-dvr.m3u8".format(domain, hashed_base_url, base_url))
+            vod_url_list.append(f"{domain}{hashed_base_url}_{base_url}/chunked/index-dvr.m3u8")
     request_session = requests.Session()
     rs = [grequests.head(u, session=request_session) for u in vod_url_list]
     for response in grequests.imap(rs, size=request_config["MAX_REQUEST_SIZE"]):
