@@ -1,18 +1,16 @@
 import datetime
-import hashlib
 import json
 import csv
 import os
 import random
 import re
 import subprocess
-from datetime import timedelta
 import grequests
 import requests
 from bs4 import BeautifulSoup
 from natsort import natsorted
 
-with open("config/vodrecovery_config.json") as config_file:
+with open("config/config.json") as config_file:
     vodrecovery_config = json.load(config_file)
 
 
@@ -87,32 +85,6 @@ def generate_website_links(streamer_name, vod_id):
     return website_list
 
 
-def check_response_status_code(response):
-    status_codes = vodrecovery_config["REQUESTS"]["STATUS CODES"]
-    if response.status_code == status_codes["OK"]:
-        return True
-    else:
-        pass
-
-
-def return_header():
-    header = {
-        'user-agent': f'{random.choice(user_agents)}'
-    }
-    return header
-
-
-def remove_file(file_path):
-    if os.path.exists(file_path):
-        return os.remove(file_path)
-
-
-def format_timestamp(timestamp):
-    datetime_config = vodrecovery_config["DATETIME VALUES"]
-    formatted_date = datetime.datetime.strptime(timestamp, datetime_config["DEFAULT_DATETIME_FORMAT"])
-    return formatted_date
-
-
 def get_vod_age(timestamp):
     vod_age = datetime.datetime.today() - format_timestamp(timestamp)
     if vod_age.days <= 0:
@@ -124,42 +96,6 @@ def get_vod_age(timestamp):
 def is_vod_muted(url):
     response = requests.get(url).text
     return bool("unmuted" in response)
-
-
-def get_duration(hours, minutes):
-    return (int(hours) * 60) + int(minutes)
-
-
-def get_reps(duration):
-    return (duration * 60) + 2000
-
-
-def get_clip_format(vod_id, reps):
-    default_clip_list = ["https://clips-media-assets2.twitch.tv/" + vod_id + "-offset-" + str(i) + ".mp4" for i in
-                         range(reps) if i % 2 == 0]
-
-    alternate_clip_list = ["https://clips-media-assets2.twitch.tv/vod-" + vod_id + "-offset-" + str(i) + ".mp4" for i in
-                           range(reps) if i % 2 == 0]
-
-    legacy_clip_list = [
-        "https://clips-media-assets2.twitch.tv/" + vod_id + "-index-" + "%010g" % (int('000000000') + i) + ".mp4" for i
-        in range(reps)]
-
-    clip_format_dict = {}
-
-    clip_format_dict.update({"1": default_clip_list})
-    clip_format_dict.update({"2": alternate_clip_list})
-    clip_format_dict.update({"3": legacy_clip_list})
-
-    return clip_format_dict
-
-
-def get_all_clip_urls(clip_dict, clip_format):
-    full_url_list = []
-    for key, value in clip_dict.items():
-        if key in clip_format:
-            full_url_list += value
-    return full_url_list
 
 
 def parse_streamer_from_m3u8_link(url):
@@ -198,29 +134,6 @@ def return_file_contents(streamer_name, vod_id):
         content = f.readlines()
         content = [lines.strip() for lines in content]
     return content
-
-
-def extract_offset(clip_url):
-    clip_offset = re.search(r'(?:-offset|-index)-(\d+)', clip_url)
-    return clip_offset.group(1)
-
-
-def get_vod_urls(streamer, vod_id, timestamp):
-    vod_url_list, valid_vod_url_list = [], []
-    request_config = vodrecovery_config["REQUESTS"]
-    for seconds in range(60):
-        epoch_timestamp = ((format_timestamp(timestamp) + timedelta(seconds=seconds)) - datetime.datetime(1970, 1,
-                                                                                                          1)).total_seconds()
-        base_url = streamer + "_" + vod_id + "_" + str(int(epoch_timestamp))
-        hashed_base_url = str(hashlib.sha1(base_url.encode('utf-8')).hexdigest())[:20]
-        for domain in domains:
-            vod_url_list.append(f"{domain}{hashed_base_url}_{base_url}/chunked/index-dvr.m3u8")
-    request_session = requests.Session()
-    rs = [grequests.head(u, session=request_session) for u in vod_url_list]
-    for response in grequests.imap(rs, size=request_config["MAX_REQUEST_SIZE"]):
-        if check_response_status_code(response):
-            valid_vod_url_list.append(response.url)
-    return valid_vod_url_list
 
 
 def parse_duration_streamscharts(tracker_url):
