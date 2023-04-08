@@ -31,6 +31,3 @@ def get_vod_urls(streamer, vod_id, timestamp):
             print(response, response.url)
             valid_vod_url_list.append(response.url)
     return valid_vod_url_list
-
-
-print((get_vod_urls("amouranth", "48269475405", "2023-04-07 03:33:00")))
