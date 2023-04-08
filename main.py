@@ -85,14 +85,6 @@ def generate_website_links(streamer_name, vod_id):
     return website_list
 
 
-def get_vod_age(timestamp):
-    vod_age = datetime.datetime.today() - format_timestamp(timestamp)
-    if vod_age.days <= 0:
-        return 0
-    else:
-        return vod_age.days
-
-
 def is_vod_muted(url):
     response = requests.get(url).text
     return bool("unmuted" in response)
