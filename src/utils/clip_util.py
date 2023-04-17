@@ -40,6 +40,5 @@ def return_all_clip_urls(clip_dict, clip_format):
     for key, value in clip_dict.items():
         if key in clip_format:
             clip_url_list += value
-
     # Return the list 'clip_url_list'
     return clip_url_list
